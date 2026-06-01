@@ -1,0 +1,15 @@
+# build.yaml — place in the ROOT of your zmk-config repo (next to the config/ folder).
+# Both halves run nice!nano v2. Encoders are turned on in config/kyria.conf.
+#
+# REVISION: your QMK OLED text said "Kyria rev 2", so this targets rev2.
+#   - rev3 (per-key RGB option, five selectable encoder positions):
+#       kyria_rev3_left / kyria_rev3_right
+#   - original rev1:
+#       kyria_left / kyria_right
+# Change the two shield lines below if yours differs.
+---
+include:
+  - board: nice_nano_v2
+    shield: kyria_rev2_left
+  - board: nice_nano_v2
+    shield: kyria_rev2_right
