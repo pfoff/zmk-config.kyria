@@ -1,15 +1,14 @@
-# build.yaml — place in the ROOT of your zmk-config repo (next to the config/ folder).
-# Encoders are turned on in config/kyria_rev2.conf.
+# build.yaml — repo ROOT (next to config/). Encoders enabled in config/kyria_rev3.conf.
 #
-# BOARD NAME: current ZMK (main / Zephyr 4.x) renamed the nice!nano v2 board from
-# "nice_nano_v2" to just "nice_nano". If you ever pin to an OLD release tag, it may
-# want "nice_nano_v2" again — swap back if the build says "No board named ... found".
+# BOARD: ZMK on Zephyr 4.1+ requires the "zmk" board variant suffix.
+#   nice!nano v2 = nice_nano/nrf52840/zmk   (the nice_nano base defaults to the v2 revision)
+#   Short form nice_nano//zmk also works. Plain "nice_nano" is rejected ("not set up for ZMK").
 #
-# REVISION: targets kyria_rev2_*. For a rev3 board use kyria_rev3_left/right
-# (and rename the config files to kyria_rev3.keymap / kyria_rev3.conf to match).
+# SHIELDS: kyria_rev3_left / kyria_rev3_right (your wireless PCB is a rev3).
+# Config files are named kyria_rev3.keymap / kyria_rev3.conf to match the shield base.
 ---
 include:
-  - board: nice_nano
-    shield: kyria_rev2_left
-  - board: nice_nano
-    shield: kyria_rev2_right
+  - board: nice_nano/nrf52840/zmk
+    shield: kyria_rev3_left
+  - board: nice_nano/nrf52840/zmk
+    shield: kyria_rev3_right
