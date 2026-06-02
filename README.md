@@ -9,8 +9,8 @@ converted from a QMK `keymap.c`.
 .github/workflows/build.yml   GitHub Actions build (produces the .uf2 files)
 build.yaml                    which board + shields to build
 config/west.yml               ZMK build dependencies
-config/kyria.keymap           the keymap (6 layers + encoders)
-config/kyria.conf             feature flags (encoders, mouse, RGB, sleep)
+config/kyria_rev2.keymap           the keymap (6 layers + encoders)
+config/kyria_rev2.conf             feature flags (encoders, mouse, RGB, sleep)
 ```
 
 ## Building
@@ -35,11 +35,11 @@ No local toolchain needed — the build runs in the cloud.
 - **Encoders:** one per half. Left encoder sits on the Ctrl key, right encoder
   on Backspace. Rotation is handled by the per-layer `sensor-bindings`; the
   encoder push is just the key it sits on (Ctrl / Backspace). Enabled via
-  `CONFIG_EC11=y` in `kyria.conf`.
+  `CONFIG_EC11=y` in `kyria_rev2.conf`.
 - **No OLED.** No display config is included.
 - **RGB underglow** is enabled so the `RGB_*` keys on the ADJUST layer work. It
   compiles fine even with no LEDs soldered; delete `CONFIG_ZMK_RGB_UNDERGLOW=y`
-  from `kyria.conf` if you don't want it.
+  from `kyria_rev2.conf` if you don't want it.
 
 ## Layers
 
@@ -54,7 +54,7 @@ with a `conditional_layers` node).
   also held Left-Shift; that's dropped to keep the FUNCSHIFT F-keys clean.
   Capitals come from the dedicated LSHFT/RSHFT keys on the bottom row. An
   optional `&sshft` macro that restores hold-Shift is included (commented) in
-  `kyria.keymap`.
+  `kyria_rev2.keymap`.
 - **Encoder Alt-Tab** (ADJUST layer) is approximated with `&inc_dec_kp` — it
   cycles windows but taps Alt each detent instead of holding it.
 - **Both encoders currently do the same thing per layer** (matching the QMK
