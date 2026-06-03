@@ -24,6 +24,7 @@
 #define SHIFTED   3
 #define FUNCTION  4
 #define FUNCSHIFT 5
+#define MACOS     6   /* toggled modifier-swap layer for macOS (Ctrl<->Cmd) */
 
 / {
     /*
@@ -58,7 +59,7 @@
             bindings = <
 &kp K_SLEEP  &trans  &trans  &trans  &trans  &trans                                              &trans          &trans          &trans          &trans          &trans          &trans
 &trans       &trans  &trans  &trans  &trans  &trans                                              &trans &trans &trans &trans &trans &trans
-&trans       &trans  &trans  &trans  &trans  &trans  &kp C_BRI_UP  &kp C_VOL_UP    &trans  &trans &trans          &trans &trans &trans &trans &kp RET
+&trans       &trans  &trans  &trans  &trans  &trans  &kp C_BRI_UP  &kp C_VOL_UP    &trans  &trans &trans          &tog MACOS &trans &trans &trans &kp RET
                                  &trans  &mkp RCLK  &trans  &kp C_BRI_DN  &kp C_VOL_DN     &trans  &trans  &trans  &trans  &trans
             >;
             /* ADJUST encoder: approximate QMK's smart Alt-Tab. CW = Alt+Tab, CCW = Alt+Shift+Tab.
@@ -85,9 +86,9 @@
                Also the tri-layer companion to FUNCTION (-> FUNCSHIFT). Transparent keys
                fall through to QWERTY, so FUNCTION/SPACE/etc. on the thumbs still work. */
             bindings = <
-&kp TILDE  &kp LS(Q)  &kp LS(W)  &kp LS(E)  &kp LS(R)  &kp LS(T)                                       &kp LS(Y)  &kp LS(U)  &kp LS(I)  &kp LS(O)  &kp LS(P)  &trans
-&trans     &kp LS(A)  &kp LS(S)  &kp LS(D)  &kp LS(F)  &kp LS(G)                                       &kp LS(H)  &kp LS(J)  &kp LS(K)  &kp LS(L)  &kp COLON  &kp DQT
-&trans     &kp LS(Z)  &kp LS(X)  &kp LS(C)  &kp LS(V)  &kp LS(B)  &trans  &trans   &trans  &trans       &kp LS(N)  &kp LS(M)  &kp LT     &kp GT     &kp QMARK  &trans
+&kp LS(GRAVE) &kp LS(Q) &kp LS(W) &kp LS(E) &kp LS(R) &kp LS(T)                                  &kp LS(Y) &kp LS(U) &kp LS(I) &kp LS(O) &kp LS(P)    &trans
+&trans        &kp LS(A) &kp LS(S) &kp LS(D) &kp LS(F) &kp LS(G)                                  &kp LS(H) &kp LS(J) &kp LS(K) &kp LS(L) &kp LS(SEMI) &kp LS(SQT)
+&trans        &kp LS(Z) &kp LS(X) &kp LS(C) &kp LS(V) &kp LS(B) &trans &trans  &trans &trans     &kp LS(N) &kp LS(M) &kp LS(COMMA) &kp LS(DOT) &kp LS(FSLH) &trans
                                   &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
             >;
             /* SHIFTED encoder: CW = PageUp, CCW = PageDown */
@@ -117,6 +118,24 @@
             >;
             /* FUNCSHIFT encoder: CW = Volume Up, CCW = Volume Down */
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_VOL_UP C_VOL_DN>;
+        };
+
+        macos_layer {
+            display-name = "macOS";
+            /* Toggled with ADJUST + M (&tog MACOS). Transparent everywhere except the
+               modifier keys, where Ctrl is swapped to Cmd (GUI) for macOS muscle memory:
+                 - left Ctrl/Esc mod-tap (pos 12)        -> Cmd/Esc
+                 - left inner Ctrl / encoder push (pos 31) -> Cmd
+                 - left-thumb GUI (pos 42)               -> Ctrl
+               Alt/Option is unchanged. The right Ctrl/' mod-tap (pos 23) is left alone so
+               Shift+' still types " on the SHIFTED layer. Toggle does NOT survive a reboot. */
+            bindings = <
+&trans         &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&mt LGUI ESC   &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans         &trans  &trans  &trans  &trans  &trans  &trans  &kp LGUI    &trans &trans &trans  &trans  &trans  &trans  &trans  &trans
+                                  &trans  &trans  &kp LCTRL  &trans  &trans   &trans  &trans  &trans  &trans  &trans
+            >;
+            sensor-bindings = <&inc_dec_kp DOWN UP &inc_dec_kp DOWN UP>;
         };
     };
 };
