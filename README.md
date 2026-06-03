@@ -48,6 +48,11 @@ No local toolchain needed — the build runs in the cloud.
 FUNCTION + SHIFTED held together activate FUNCSHIFT (QMK tri-layer, done here
 with a `conditional_layers` node).
 
+`6 macOS` is an optional toggle layer (ADJUST + M). It swaps Ctrl->Cmd on the
+left-side modifiers for macOS muscle memory. It is a press-to-toggle and does
+not persist across a reboot; for a permanent swap use macOS System Settings >
+Keyboard > Modifier Keys instead.
+
 ## Notes carried over from the QMK conversion
 
 - **Right thumb (`SSHFT`)** is a plain `&mo SHIFTED` momentary layer. In QMK it
