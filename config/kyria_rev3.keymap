@@ -25,6 +25,7 @@
 #define FUNCTION  4
 #define FUNCSHIFT 5
 #define MACOS     6   /* toggled modifier-swap layer for macOS (Ctrl<->Cmd) */
+#define SPACED_MAC 7  /* auto: SPACED + MACOS -> Cmd+Tab task switch instead of Alt+Tab */
 
 / {
     /*
@@ -36,6 +37,11 @@
         funcshift {
             if-layers = <FUNCTION SHIFTED>;
             then-layer = <FUNCSHIFT>;
+        };
+        spaced_mac {
+            /* On macOS (MACOS toggled) the SPACED encoders task-switch with Cmd+Tab. */
+            if-layers = <SPACED MACOS>;
+            then-layer = <SPACED_MAC>;
         };
     };
 
@@ -50,8 +56,8 @@
 &kp LSHFT      &kp Z  &kp X  &kp C  &kp V  &kp B  &kp TAB  &kp LCTRL        &kp LALT  &kp RET      &kp N     &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHFT
                           &mo ADJUST  &mkp LCLK  &kp RGUI  &lt SPACED SPACE  &mo FUNCTION    &mo SHIFTED  &lt SPACED SPACE  &kp BSPC  &kp DEL  &mkp MCLK
             >;
-            /* QWERTY encoder: CW = Down, CCW = Up (both encoders identical, as in QMK) */
-            sensor-bindings = <&inc_dec_kp DOWN UP &inc_dec_kp DOWN UP>;
+            /* Encoder: e1 (left) = cursor right/left, e2 (right) = cursor up/down */
+            sensor-bindings = <&inc_dec_kp RIGHT LEFT &inc_dec_kp UP DOWN>;
         };
 
         adjust_layer {
@@ -62,9 +68,8 @@
 &trans       &trans  &trans  &trans  &trans  &trans  &kp C_BRI_UP  &kp C_VOL_UP    &trans  &trans &trans          &tog MACOS &trans &trans &trans &kp RET
                                  &trans  &mkp RCLK  &trans  &kp C_BRI_DN  &kp C_VOL_DN     &trans  &trans  &trans  &trans  &trans
             >;
-            /* ADJUST encoder: approximate QMK's smart Alt-Tab. CW = Alt+Tab, CCW = Alt+Shift+Tab.
-               NOTE: this taps Alt+Tab each detent rather than holding Alt across the gesture. */
-            sensor-bindings = <&inc_dec_kp LA(TAB) LS(LA(TAB)) &inc_dec_kp LA(TAB) LS(LA(TAB))>;
+            /* Encoder: e1 (left) = cursor right/left, e2 (right) = cursor up/down */
+            sensor-bindings = <&inc_dec_kp RIGHT LEFT &inc_dec_kp UP DOWN>;
         };
 
         spaced_layer {
@@ -75,8 +80,11 @@
 &kp CAPS   &kp ESC    &mkp MCLK      &kp DEL         &kp BSPC        &kp INS  &trans  &trans   &trans &trans &trans    &kp K_APP  &kp HOME &kp END     &kp BSLH   &kp PG_DN
                                           &trans  &trans  &trans  &trans  &trans     &trans  &trans  &kp DEL  &kp SPACE  &trans
             >;
-            /* SPACED encoder: CW = PageDown, CCW = PageUp */
-            sensor-bindings = <&inc_dec_kp PG_DN PG_UP &inc_dec_kp PG_DN PG_UP>;
+            /* Encoder: both = task switch. CW = Alt+Tab (next), CCW = Shift+Alt+Tab (prev).
+               NOTE: taps the combo each detent, so it toggles between the two most-recent
+               windows rather than scrolling through all. A hold-Alt "swapper" is possible
+               but needs an extra behavior module - ask if you want it. */
+            sensor-bindings = <&inc_dec_kp LA(TAB) LS(LA(TAB)) &inc_dec_kp LA(TAB) LS(LA(TAB))>;
         };
 
         shifted_layer {
@@ -91,8 +99,8 @@
 &trans        &kp LS(Z) &kp LS(X) &kp LS(C) &kp LS(V) &kp LS(B) &trans &trans  &trans &trans     &kp LS(N) &kp LS(M) &kp LS(COMMA) &kp LS(DOT) &kp LS(FSLH) &trans
                                   &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
             >;
-            /* SHIFTED encoder: CW = PageUp, CCW = PageDown */
-            sensor-bindings = <&inc_dec_kp PG_UP PG_DN &inc_dec_kp PG_UP PG_DN>;
+            /* Encoder: e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
         };
 
         function_layer {
@@ -103,8 +111,8 @@
 &trans     &kp ASTRK  &kp UNDER  &kp EXCL   &kp DLLR   &kp BSLH  &trans  &trans  &trans &trans &kp LBRC  &kp N1  &kp N2     &kp N3   &kp EQUAL  &kp RET
                                      &trans  &trans  &trans  &trans  &trans      &trans  &kp N0  &kp DOT  &kp COMMA  &kp RET
             >;
-            /* FUNCTION encoder: CW = Brightness Up, CCW = Brightness Down */
-            sensor-bindings = <&inc_dec_kp C_BRI_UP C_BRI_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
+            /* Encoder: e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
         };
 
         funcshift_layer {
@@ -116,8 +124,8 @@
 &trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans &kp RBRC  &kp F1  &kp F2  &kp F3  &kp F12  &kp PSCRN
                                   &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans
             >;
-            /* FUNCSHIFT encoder: CW = Volume Up, CCW = Volume Down */
-            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_VOL_UP C_VOL_DN>;
+            /* Encoder: e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
         };
 
         macos_layer {
@@ -135,7 +143,21 @@
 &trans         &trans  &trans  &trans  &trans  &trans  &trans  &kp LGUI    &trans &trans &trans  &trans  &trans  &trans  &trans  &trans
                                   &trans  &trans  &kp LCTRL  &trans  &trans   &trans  &trans  &trans  &trans  &trans
             >;
-            sensor-bindings = <&inc_dec_kp DOWN UP &inc_dec_kp DOWN UP>;
+            /* No sensor-bindings on purpose: encoders fall through to whichever layer is
+               active underneath, so Mac mode keeps each layer's own encoder function. */
+        };
+
+        spaced_mac_layer {
+            display-name = "Spaced(Mac)";
+            /* Auto-active when SPACED + MACOS are both on. Keys are transparent (fall
+               through to SPACED); only the encoders change: Cmd+Tab instead of Alt+Tab. */
+            bindings = <
+&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans    &trans  &trans  &trans  &trans  &trans  &trans
+                                  &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
+            >;
+            sensor-bindings = <&inc_dec_kp LG(TAB) LS(LG(TAB)) &inc_dec_kp LG(TAB) LS(LG(TAB))>;
         };
     };
 };
