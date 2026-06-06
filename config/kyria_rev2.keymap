@@ -1,0 +1,6 @@
+/*
+ * Kyria rev2.1 (underglow LEDs, all keys as keys, no encoders).
+ * Switch is set here; the actual keymap lives in kyria_base.dtsi.
+ */
+#define HAS_UNDERGLOW
+#include "kyria_base.dtsi"

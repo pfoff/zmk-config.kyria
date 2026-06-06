@@ -1,0 +1,204 @@
+/*
+ * Shared Kyria keymap (single source of truth for both revisions).
+ *
+ * Do NOT build this file directly. The per-revision wrappers set a switch and
+ * include it:
+ *   kyria_rev3.keymap -> #define HAS_ENCODERS   (encoders, no underglow)
+ *   kyria_rev2.keymap -> #define HAS_UNDERGLOW  (underglow LEDs, no encoders)
+ *
+ * Layer order (from the original QMK enum):
+ *   0 QWERTY | 1 ADJUST | 2 SPACED | 3 SHIFTED | 4 FUNCTION | 5 FUNCSHIFT
+ *   6 MACOS (toggle) | 7 SPACED_MAC (auto)
+ *
+ * Kyria key positions:
+ *   ╭────────────────────────╮                 ╭────────────────────────╮
+ *   │  0   1   2   3   4   5 │                 │  6   7   8   9  10  11 │
+ *   │ 12  13  14  15  16  17 ╰───────╮ ╭───────╯ 18  19  20  21  22  23 │
+ *   │ 24  25  26  27  28  29  30  31 │ │ 32  33  34  35  36  37  38  39 │
+ *   ╰───────────╮ 40  41  42  43  44 │ │ 45  46  47  48  49 ╭───────────╯
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/pointing.h>   /* mouse: &mkp &mmv &msc */
+
+/*
+ * Underglow keys. On a board with HAS_UNDERGLOW they are real &rgb_ug controls;
+ * otherwise they collapse to &trans so the matrix keeps its 50 positions and the
+ * keymap stays identical on the encoder board.
+ */
+#ifdef HAS_UNDERGLOW
+#include <dt-bindings/zmk/rgb.h>
+#define UG_TOG &rgb_ug RGB_TOG
+#define UG_EFF &rgb_ug RGB_EFF
+#define UG_EFR &rgb_ug RGB_EFR
+#define UG_HUI &rgb_ug RGB_HUI
+#define UG_HUD &rgb_ug RGB_HUD
+#define UG_SAI &rgb_ug RGB_SAI
+#define UG_SAD &rgb_ug RGB_SAD
+#define UG_BRI &rgb_ug RGB_BRI
+#define UG_BRD &rgb_ug RGB_BRD
+#define UG_SPI &rgb_ug RGB_SPI
+#define UG_SPD &rgb_ug RGB_SPD
+#else
+#define UG_TOG &trans
+#define UG_EFF &trans
+#define UG_EFR &trans
+#define UG_HUI &trans
+#define UG_HUD &trans
+#define UG_SAI &trans
+#define UG_SAD &trans
+#define UG_BRI &trans
+#define UG_BRD &trans
+#define UG_SPI &trans
+#define UG_SPD &trans
+#endif
+
+#define QWERTY    0
+#define ADJUST    1
+#define SPACED    2
+#define SHIFTED   3
+#define FUNCTION  4
+#define FUNCSHIFT 5
+#define MACOS     6   /* toggled modifier-swap layer for macOS (Ctrl<->Cmd) */
+#define SPACED_MAC 7  /* auto: SPACED + MACOS -> Cmd+Tab task switch instead of Alt+Tab */
+
+/ {
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        funcshift {
+            /* QMK tri-layer: FUNCTION + SHIFTED -> FUNCSHIFT */
+            if-layers = <FUNCTION SHIFTED>;
+            then-layer = <FUNCSHIFT>;
+        };
+        spaced_mac {
+            /* On macOS the SPACED encoders task-switch with Cmd+Tab instead of Alt+Tab. */
+            if-layers = <SPACED MACOS>;
+            then-layer = <SPACED_MAC>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        qwerty_layer {
+            display-name = "QWERTY";
+            bindings = <
+&kp GRAVE      &kp Q  &kp W  &kp E  &kp R  &kp T                                                  &kp Y     &kp U  &kp I      &kp O    &kp P     &kp BSPC
+&mt LCTRL ESC  &kp A  &kp S  &kp D  &kp F  &kp G                                                  &kp H     &kp J  &kp K      &kp L    &kp SEMI  &mt RCTRL SQT
+&kp LSHFT      &kp Z  &kp X  &kp C  &kp V  &kp B  &kp TAB  &kp LCTRL        &kp LALT  &kp RET      &kp N     &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHFT
+                          &mo ADJUST  &mkp LCLK  &kp RGUI  &lt SPACED SPACE  &mo FUNCTION    &mo SHIFTED  &lt SPACED SPACE  &kp BSPC  &kp DEL  &mkp MCLK
+            >;
+#ifdef HAS_ENCODERS
+            /* e1 (left) = cursor right/left, e2 (right) = cursor up/down */
+            sensor-bindings = <&inc_dec_kp RIGHT LEFT &inc_dec_kp UP DOWN>;
+#endif
+        };
+
+        adjust_layer {
+            display-name = "Adjust";
+            /* Left hand: K_SLEEP, BT profiles 0-4, output select, BT clear.
+               Right hand (only active with HAS_UNDERGLOW): RGB underglow controls. */
+            bindings = <
+&kp K_SLEEP  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4               UG_TOG   UG_HUI  UG_SAI  UG_BRI  UG_SPI  UG_EFF
+&trans       &out OUT_USB  &out OUT_BLE    &out OUT_TOG  &trans  &trans                           &trans   UG_HUD  UG_SAD  UG_BRD  UG_SPD  UG_EFR
+&trans       &bt BT_CLR    &bt BT_CLR_ALL  &trans  &trans  &trans  &kp C_BRI_UP  &kp C_VOL_UP    &trans  &trans &trans  &tog MACOS &trans &trans &trans &kp RET
+                                 &trans  &mkp RCLK  &trans  &kp C_BRI_DN  &kp C_VOL_DN     &trans  &trans  &trans  &trans  &trans
+            >;
+#ifdef HAS_ENCODERS
+            /* e1 (left) = cursor right/left, e2 (right) = cursor up/down */
+            sensor-bindings = <&inc_dec_kp RIGHT LEFT &inc_dec_kp UP DOWN>;
+#endif
+        };
+
+        spaced_layer {
+            display-name = "Spaced";
+            bindings = <
+&kp GRAVE  &kp ESC    &mkp LCLK      &mmv MOVE_UP    &mkp RCLK       &msc SCRL_UP                          &trans     &trans     &trans   &trans      &kp MINUS  &trans
+&trans     &kp GRAVE  &mmv MOVE_LEFT &mmv MOVE_DOWN  &mmv MOVE_RIGHT &msc SCRL_DOWN                        &kp LEFT   &kp DOWN   &kp UP   &kp RIGHT   &kp EQUAL  &kp PG_UP
+&kp CAPS   &kp ESC    &mkp MCLK      &kp DEL         &kp BSPC        &kp INS  &trans  &trans   &trans &trans &trans    &kp K_APP  &kp HOME &kp END     &kp BSLH   &kp PG_DN
+                                          &trans  &trans  &trans  &trans  &trans     &trans  &trans  &kp DEL  &kp SPACE  &trans
+            >;
+#ifdef HAS_ENCODERS
+            /* both = task switch. CW = Alt+Tab, CCW = Shift+Alt+Tab. Taps the combo each
+               detent (toggles between the two most-recent windows). A hold-Alt "swapper"
+               needs an extra module - ask if you want it. */
+            sensor-bindings = <&inc_dec_kp LA(TAB) LS(LA(TAB)) &inc_dec_kp LA(TAB) LS(LA(TAB))>;
+#endif
+        };
+
+        shifted_layer {
+            display-name = "Shifted";
+            /* Right thumb (&mo SHIFTED) turns this on -> capital letters and shifted
+               punctuation without a hardware modifier. Also the tri-layer companion to
+               FUNCTION (-> FUNCSHIFT). */
+            bindings = <
+&kp LS(GRAVE) &kp LS(Q) &kp LS(W) &kp LS(E) &kp LS(R) &kp LS(T)                                  &kp LS(Y) &kp LS(U) &kp LS(I) &kp LS(O) &kp LS(P)    &trans
+&trans        &kp LS(A) &kp LS(S) &kp LS(D) &kp LS(F) &kp LS(G)                                  &kp LS(H) &kp LS(J) &kp LS(K) &kp LS(L) &kp LS(SEMI) &kp LS(SQT)
+&trans        &kp LS(Z) &kp LS(X) &kp LS(C) &kp LS(V) &kp LS(B) &trans &trans  &trans &trans     &kp LS(N) &kp LS(M) &kp LS(COMMA) &kp LS(DOT) &kp LS(FSLH) &trans
+                                  &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
+            >;
+#ifdef HAS_ENCODERS
+            /* e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
+#endif
+        };
+
+        function_layer {
+            display-name = "Function";
+            bindings = <
+&kp GRAVE  &kp AMPS   &kp PRCNT  &trans     &kp CARET  &kp PIPE                              &kp LBKT  &kp N7  &kp N8     &kp N9   &kp MINUS  &trans
+&trans     &kp AT     &trans     &trans     &trans     &kp HASH                              &kp LPAR  &kp N4  &kp N5     &kp N6   &kp PLUS   &trans
+&trans     &kp ASTRK  &kp UNDER  &kp EXCL   &kp DLLR   &kp BSLH  &trans  &trans  &trans &trans &kp LBRC  &kp N1  &kp N2     &kp N3   &kp EQUAL  &kp RET
+                                     &trans  &trans  &trans  &trans  &trans      &trans  &kp N0  &kp DOT  &kp COMMA  &kp RET
+            >;
+#ifdef HAS_ENCODERS
+            /* e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
+#endif
+        };
+
+        funcshift_layer {
+            display-name = "FuncShift";
+            bindings = <
+&kp K_PWR  &trans  &trans  &trans  &trans  &trans                              &kp RBKT  &kp F7  &kp F8  &kp F9  &kp F10  &trans
+&trans     &trans  &trans  &trans  &trans  &trans                              &kp RPAR  &kp F4  &kp F5  &kp F6  &kp F11  &kp EXCL
+&trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans &kp RBRC  &kp F1  &kp F2  &kp F3  &kp F12  &kp PSCRN
+                                  &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans
+            >;
+#ifdef HAS_ENCODERS
+            /* e1 (left) = Volume up/down, e2 (right) = Brightness up/down */
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp C_BRI_UP C_BRI_DN>;
+#endif
+        };
+
+        macos_layer {
+            display-name = "macOS";
+            /* Toggled with ADJUST + M. Transparent except the left-side modifiers, where
+               Ctrl is swapped to Cmd. Toggle does NOT survive a reboot. */
+            bindings = <
+&trans         &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&mt LGUI ESC   &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans         &trans  &trans  &trans  &trans  &trans  &trans  &kp LGUI    &trans &trans &trans  &trans  &trans  &trans  &trans  &trans
+                                  &trans  &trans  &kp LCTRL  &trans  &trans   &trans  &trans  &trans  &trans  &trans
+            >;
+            /* No sensor-bindings: encoders fall through to the layer underneath. */
+        };
+
+        spaced_mac_layer {
+            display-name = "Spaced(Mac)";
+            /* Auto when SPACED + MACOS. Transparent keys; only the encoders change. */
+            bindings = <
+&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans    &trans  &trans  &trans  &trans  &trans  &trans
+                                  &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
+            >;
+#ifdef HAS_ENCODERS
+            sensor-bindings = <&inc_dec_kp LG(TAB) LS(LG(TAB)) &inc_dec_kp LG(TAB) LS(LG(TAB))>;
+#endif
+        };
+    };
+};
