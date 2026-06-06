@@ -5,7 +5,7 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: main          # for stability you can pin this to a release tag, e.g. v0.3
+      revision: v0.3.0        # pinned stable release (avoids main breakage). Bump deliberately.
       import: app/west.yml
   self:
     path: config
