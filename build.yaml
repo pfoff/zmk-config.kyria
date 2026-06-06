@@ -1,14 +1,19 @@
-# build.yaml — repo ROOT (next to config/). Encoders enabled in config/kyria_rev3.conf.
+# build.yaml - one repo, all targets. GitHub Actions builds every entry in one run.
 #
-# BOARD: ZMK on Zephyr 4.1+ requires the "zmk" board variant suffix.
-#   nice!nano v2 = nice_nano/nrf52840/zmk   (the nice_nano base defaults to the v2 revision)
-#   Short form nice_nano//zmk also works. Plain "nice_nano" is rejected ("not set up for ZMK").
-#
-# SHIELDS: kyria_rev3_left / kyria_rev3_right (your wireless PCB is a rev3).
-# Config files are named kyria_rev3.keymap / kyria_rev3.conf to match the shield base.
+# BOARD for rev2.1: assumed nice!nano (nice_nano/nrf52840/zmk), because the Kyria
+# shield ships the underglow LED-strip overlay for that board, so underglow works
+# out of the box. If your rev2.1 board is a wired Liatris / other RP2040, change
+# its two board lines AND tell me - underglow then needs a strip overlay for that
+# board, which the Kyria shield may not include.
 ---
 include:
+  # Wireless rev3 - encoders, no underglow
   - board: nice_nano/nrf52840/zmk
     shield: kyria_rev3_left
   - board: nice_nano/nrf52840/zmk
     shield: kyria_rev3_right
+  # rev2.1 - underglow LEDs, no encoders
+  - board: nice_nano/nrf52840/zmk
+    shield: kyria_rev2_left
+  - board: nice_nano/nrf52840/zmk
+    shield: kyria_rev2_right

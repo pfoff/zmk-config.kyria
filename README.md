@@ -7,11 +7,31 @@ converted from a QMK `keymap.c`.
 
 ```
 .github/workflows/build.yml   GitHub Actions build (produces the .uf2 files)
-build.yaml                    which board + shields to build
+build.yaml                    board + shields for ALL targets (one run builds everything)
 config/west.yml               ZMK build dependencies
-config/kyria_rev3.keymap           the keymap (6 layers + encoders)
-config/kyria_rev3.conf             feature flags (encoders, mouse, RGB, sleep)
+config/kyria_base.dtsi        the actual keymap - single source of truth for BOTH boards
+config/kyria_rev3.keymap      thin wrapper: #define HAS_ENCODERS  + include base
+config/kyria_rev2.keymap      thin wrapper: #define HAS_UNDERGLOW + include base
+config/kyria_rev3.conf        rev3 features (encoders, mouse, sleep)
+config/kyria_rev2.conf        rev2.1 features (underglow + gradient, mouse, sleep)
 ```
+
+## Two boards, one source
+
+Both Kyrias share `kyria_base.dtsi`. The per-revision `.keymap` files are one-line
+switches that set a `#define` and include the base:
+
+- **rev3** (wireless, nice!nano): `HAS_ENCODERS` -> rotary encoders, no underglow.
+- **rev2.1**: `HAS_UNDERGLOW` -> RGB underglow LEDs (default: swirl gradient), no encoders.
+
+`build.yaml` lists all four targets (two halves x two revisions), so one GitHub
+Actions run produces all the `.uf2` files - no second repo needed. Edit the keymap
+once in `kyria_base.dtsi` and both boards update.
+
+The rev2.1 underglow controls live on the right hand of the Adjust layer (toggle,
+hue, saturation, brightness, speed, effect). On the rev3 board those same positions
+collapse to transparent, so the layout is otherwise identical.
+
 
 ## Building
 
