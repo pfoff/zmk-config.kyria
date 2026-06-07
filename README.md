@@ -1,89 +1,89 @@
 # Kyria ZMK config
 
-ZMK firmware config for a wireless SplitKB Kyria (nice!nano v2 in both halves),
+ZMK firmware for two SplitKB Kyria keyboards from a single shared keymap,
 converted from a QMK `keymap.c`.
+
+- **rev3** — wireless (nice!nano v2), rotary encoders, no underglow.
+- **rev2.1** — wireless (nice!nano v2), RGB underglow LEDs, no encoders.
+
+Pinned to ZMK **v0.3.0** so upstream `main` changes can't break the build.
 
 ## Repo layout
 
 ```
-.github/workflows/build.yml   GitHub Actions build (produces the .uf2 files)
-build.yaml                    board + shields for ALL targets (one run builds everything)
-config/west.yml               ZMK build dependencies
-config/kyria_base.dtsi        the actual keymap - single source of truth for BOTH boards
+.github/workflows/build.yml   GitHub Actions build (pinned @v0.3.0)
+build.yaml                    all four targets (two halves x two revisions)
+config/west.yml               ZMK dependency, pinned to v0.3.0
+config/kyria_base.dtsi        the keymap - single source of truth for BOTH boards
 config/kyria_rev3.keymap      thin wrapper: #define HAS_ENCODERS  + include base
 config/kyria_rev2.keymap      thin wrapper: #define HAS_UNDERGLOW + include base
 config/kyria_rev3.conf        rev3 features (encoders, mouse, sleep)
-config/kyria_rev2.conf        rev2.1 features (underglow + gradient, mouse, sleep)
+config/kyria_rev2.conf        rev2.1 features (underglow, mouse, sleep)
 ```
 
-## Two boards, one source
+## One source, two boards
 
-Both Kyrias share `kyria_base.dtsi`. The per-revision `.keymap` files are one-line
-switches that set a `#define` and include the base:
+Both keyboards share `kyria_base.dtsi`. The per-revision `.keymap` files are
+one-line switches that set a `#define` and include the base:
 
-- **rev3** (wireless, nice!nano): `HAS_ENCODERS` -> rotary encoders, no underglow.
-- **rev2.1**: `HAS_UNDERGLOW` -> RGB underglow LEDs (default: swirl gradient), no encoders.
+- `HAS_ENCODERS`  -> encoder `sensor-bindings` are compiled in.
+- `HAS_UNDERGLOW` -> the RGB keys on the Adjust layer become real `&rgb_ug`
+  controls; without it they collapse to `&trans`, so the layout is identical.
 
-`build.yaml` lists all four targets (two halves x two revisions), so one GitHub
-Actions run produces all the `.uf2` files - no second repo needed. Edit the keymap
-once in `kyria_base.dtsi` and both boards update.
+Edit the keymap once in `kyria_base.dtsi`; both boards pick it up. Per-board
+hardware differences live in the two `.conf` files.
 
-The rev2.1 underglow controls live on the right hand of the Adjust layer (toggle,
-hue, saturation, brightness, speed, effect). On the rev3 board those same positions
-collapse to transparent, so the layout is otherwise identical.
+## Building & flashing
 
+1. Push to GitHub. The **Actions** tab builds on every push.
+2. One run produces four `.uf2` files (rev3 L/R, rev2 L/R) in the artifacts zip.
+3. Per board, flash the **left** half - it is the central half that runs the
+   keymap. Double-tap reset, the nice!nano mounts as a USB drive, copy the
+   matching `.uf2` on. Then the right half the same way.
 
-## Building
-
-1. Create a new **empty** GitHub repository and push these files to it.
-2. Open the **Actions** tab — a build starts automatically on push.
-3. When it finishes, download the **artifacts** zip. It contains two files:
-   `kyria_rev3_left-nice_nano_v2-zmk.uf2` and `...right...uf2`.
-4. Flash each half: put the nice!nano into bootloader mode (double-tap reset),
-   it mounts as a USB drive, copy the matching `.uf2` onto it. Repeat for the
-   other half.
-
-No local toolchain needed — the build runs in the cloud.
-
-## Hardware assumptions
-
-- **Controllers:** nice!nano v2, both halves.
-- **Revision:** targets `kyria_rev3_*` (your old QMK OLED said "Kyria rev 2").
-  If it's a rev3, change both shield lines in `build.yaml` to `kyria_rev3_left`
-  / `kyria_rev3_right`. A wrong revision usually shows up as a dead/scrambled
-  column.
-- **Encoders:** one per half. Left encoder sits on the Ctrl key, right encoder
-  on Backspace. Rotation is handled by the per-layer `sensor-bindings`; the
-  encoder push is just the key it sits on (Ctrl / Backspace). Enabled via
-  `CONFIG_EC11=y` in `kyria_rev3.conf`.
-- **No OLED.** No display config is included.
-- **RGB underglow** is enabled so the `RGB_*` keys on the ADJUST layer work. It
-  compiles fine even with no LEDs soldered; delete `CONFIG_ZMK_RGB_UNDERGLOW=y`
-  from `kyria_rev3.conf` if you don't want it.
+No local toolchain needed.
 
 ## Layers
 
-`0 QWERTY · 1 ADJUST · 2 SPACED · 3 SHIFTED · 4 FUNCTION · 5 FUNCSHIFT`
+`0 QWERTY · 1 ADJUST · 2 SPACED · 3 SHIFTED · 4 FUNCTION · 5 FUNCSHIFT · 6 macOS · 7 Spaced(Mac)`
 
-FUNCTION + SHIFTED held together activate FUNCSHIFT (QMK tri-layer, done here
-with a `conditional_layers` node).
+- **FUNCTION + SHIFTED** held together activate **FUNCSHIFT** (QMK tri-layer, via
+  a `conditional_layers` node).
+- **macOS (6)** is an optional toggle (ADJUST + M) that swaps Ctrl->Cmd on the
+  left-side modifiers. Press-to-toggle, does not survive a reboot - for a
+  permanent swap use macOS System Settings > Keyboard > Modifier Keys.
+- **Spaced(Mac) (7)** is automatic (SPACED + macOS): the SPACED encoders then
+  task-switch with Cmd+Tab instead of Alt+Tab.
 
-`6 macOS` is an optional toggle layer (ADJUST + M). It swaps Ctrl->Cmd on the
-left-side modifiers for macOS muscle memory. It is a press-to-toggle and does
-not persist across a reboot; for a permanent swap use macOS System Settings >
-Keyboard > Modifier Keys instead.
+### Encoders (rev3), per layer
 
-## Notes carried over from the QMK conversion
+| Layer | Left encoder | Right encoder |
+| --- | --- | --- |
+| QWERTY / Adjust | cursor left/right | cursor up/down |
+| Spaced | Alt+Tab task switch | Alt+Tab task switch |
+| Shifted / Function / FuncShift | Volume | Brightness |
 
-- **Right thumb (`SSHFT`)** is a plain `&mo SHIFTED` momentary layer. In QMK it
-  also held Left-Shift; that's dropped to keep the FUNCSHIFT F-keys clean.
-  Capitals come from the dedicated LSHFT/RSHFT keys on the bottom row. An
-  optional `&sshft` macro that restores hold-Shift is included (commented) in
-  `kyria_rev3.keymap`.
-- **Encoder Alt-Tab** (ADJUST layer) is approximated with `&inc_dec_kp` — it
-  cycles windows but taps Alt each detent instead of holding it.
-- **Both encoders currently do the same thing per layer** (matching the QMK
-  code). To split them, the first binding in each `sensor-bindings` pair is the
-  left encoder, the second is the right.
-- **Leader-key sequences and OLED art** from the QMK file are not ported (no ZMK
-  equivalent / no display).
+Alt-Tab is `&inc_dec_kp`, i.e. it taps the combo each detent (toggles between the
+two most-recent windows rather than scrolling through all).
+
+### Adjust layer
+
+- **Left hand:** sleep, Bluetooth profiles 0-4 (`&bt BT_SEL`), output select
+  (`&out OUT_USB/BLE/TOG`), and BT clear (`&bt BT_CLR` / `BT_CLR_ALL`).
+- **Right hand (rev2.1 only):** RGB underglow controls - toggle, hue,
+  saturation, brightness, speed, effect.
+- **ADJUST + M:** toggle the macOS layer.
+
+## Notes
+
+- **Thumb-shift (right thumb)** is a plain `&mo SHIFTED` momentary layer that
+  carries pre-shifted keycodes (no hardware modifier held). Capitals and shifted
+  symbols come from those keycodes. **Exception:** thumb-shift + Enter sends
+  **Shift+Enter** (pos 33 on SHIFTED is `&kp LS(RET)`), so it does not submit in
+  chat apps.
+- **rev2.1 underglow** defaults to the swirl gradient and is **capped at 30%**
+  brightness to save battery (`CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX=30`). ZMK has no
+  battery-only dimming, so this is a global ceiling.
+- **Mouse emulation** (`&mkp`/`&mmv`/`&msc`) is on the SPACED layer; needs
+  `CONFIG_ZMK_POINTING=y` (set in both `.conf` files).
+- **Leader-key sequences and OLED art** from the QMK file are not ported.
