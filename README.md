@@ -70,8 +70,10 @@ two most-recent windows rather than scrolling through all).
 
 - **Left hand:** sleep, Bluetooth profiles 0-4 (`&bt BT_SEL`), output select
   (`&out OUT_USB/BLE/TOG`), and BT clear (`&bt BT_CLR` / `BT_CLR_ALL`).
-- **Right hand (rev2.1 only):** RGB underglow controls - toggle, hue,
-  saturation, brightness, speed, effect.
+- **Right hand (rev2.1 only):** RGB underglow - on/off, effect cycle
+  (solid -> breathe -> spectrum -> swirl), brightness +/-, and 8 colour presets
+  (red, orange, yellow, green, cyan, blue, purple, white). Presets set the active
+  colour, which solid/breathe show; spectrum/swirl cycle hues on their own.
 - **ADJUST + M:** toggle the macOS layer.
 
 ## Notes

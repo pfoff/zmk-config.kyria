@@ -33,27 +33,32 @@
 #include <dt-bindings/zmk/rgb.h>
 #define UG_TOG &rgb_ug RGB_TOG
 #define UG_EFF &rgb_ug RGB_EFF
-#define UG_EFR &rgb_ug RGB_EFR
-#define UG_HUI &rgb_ug RGB_HUI
-#define UG_HUD &rgb_ug RGB_HUD
-#define UG_SAI &rgb_ug RGB_SAI
-#define UG_SAD &rgb_ug RGB_SAD
 #define UG_BRI &rgb_ug RGB_BRI
 #define UG_BRD &rgb_ug RGB_BRD
-#define UG_SPI &rgb_ug RGB_SPI
-#define UG_SPD &rgb_ug RGB_SPD
+/* Direct colour presets (HSB: hue 0-360, sat/bri 0-100). Brightness 30 = the cap.
+   These set the single active colour, which solid/breathe show; spectrum/swirl
+   ignore it and cycle hues automatically. */
+#define UG_RED &rgb_ug RGB_COLOR_HSB(0,100,30)
+#define UG_ORG &rgb_ug RGB_COLOR_HSB(25,100,30)
+#define UG_YEL &rgb_ug RGB_COLOR_HSB(60,100,30)
+#define UG_GRN &rgb_ug RGB_COLOR_HSB(120,100,30)
+#define UG_CYN &rgb_ug RGB_COLOR_HSB(180,100,30)
+#define UG_BLU &rgb_ug RGB_COLOR_HSB(240,100,30)
+#define UG_PUR &rgb_ug RGB_COLOR_HSB(280,100,30)
+#define UG_WHT &rgb_ug RGB_COLOR_HSB(0,0,30)
 #else
 #define UG_TOG &trans
 #define UG_EFF &trans
-#define UG_EFR &trans
-#define UG_HUI &trans
-#define UG_HUD &trans
-#define UG_SAI &trans
-#define UG_SAD &trans
 #define UG_BRI &trans
 #define UG_BRD &trans
-#define UG_SPI &trans
-#define UG_SPD &trans
+#define UG_RED &trans
+#define UG_ORG &trans
+#define UG_YEL &trans
+#define UG_GRN &trans
+#define UG_CYN &trans
+#define UG_BLU &trans
+#define UG_PUR &trans
+#define UG_WHT &trans
 #endif
 
 #define QWERTY    0
@@ -100,10 +105,13 @@
         adjust_layer {
             display-name = "Adjust";
             /* Left hand: K_SLEEP, BT profiles 0-4, output select, BT clear.
-               Right hand (only active with HAS_UNDERGLOW): RGB underglow controls. */
+               Right hand (only with HAS_UNDERGLOW): RGB toggle + effect-cycle,
+               brightness +/-, and 8 colour presets (R O Y G C B Purple White).
+               Effect cycle steps solid -> breathe -> spectrum -> swirl. The colour
+               presets set the active colour (used by solid/breathe). */
             bindings = <
-&kp K_SLEEP  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4               UG_TOG   UG_HUI  UG_SAI  UG_BRI  UG_SPI  UG_EFF
-&trans       &out OUT_USB  &out OUT_BLE    &out OUT_TOG  &trans  &trans                           &trans   UG_HUD  UG_SAD  UG_BRD  UG_SPD  UG_EFR
+&kp K_SLEEP  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4               UG_TOG   UG_BRI  UG_RED  UG_YEL  UG_CYN  UG_PUR
+&trans       &out OUT_USB  &out OUT_BLE    &out OUT_TOG  &trans  &trans                           UG_EFF   UG_BRD  UG_ORG  UG_GRN  UG_BLU  UG_WHT
 &trans       &bt BT_CLR    &bt BT_CLR_ALL  &trans  &trans  &trans  &kp C_BRI_UP  &kp C_VOL_UP    &trans  &trans &trans  &tog MACOS &trans &trans &trans &kp RET
                                  &trans  &mkp RCLK  &trans  &kp C_BRI_DN  &kp C_VOL_DN     &trans  &trans  &trans  &trans  &trans
             >;
