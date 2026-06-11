@@ -3,8 +3,8 @@
 ZMK firmware for two SplitKB Kyria keyboards from a single shared keymap,
 converted from a QMK `keymap.c`.
 
-- **rev3** — wireless (nice!nano v2), rotary encoders, no underglow.
-- **rev2.1** — wireless (nice!nano v2), RGB underglow LEDs, no encoders.
+- **rev3** — wireless (nice!nano v2), rotary encoders, no underglow. BLE/USB name **"Portable Kyria"**.
+- **rev2.1** — wireless (nice!nano v2), RGB underglow LEDs, no encoders. BLE/USB name **"MX Kyria"**.
 
 Pinned to ZMK **v0.3.0** so upstream `main` changes can't break the build.
 
@@ -43,7 +43,16 @@ hardware differences live in the two `.conf` files.
 
 No local toolchain needed.
 
+**Renaming gotcha:** ZMK stores the BT name persistently, so changing
+`CONFIG_ZMK_KEYBOARD_NAME` does not take effect until stored settings are wiped.
+The `settings_reset` target in `build.yaml` builds a wiper `.uf2`: flash it to a
+half, let it reset, then re-flash that half's normal firmware. Also forget the old
+name on the host and re-pair.
+
 ## Layers
+
+A full per-layer key chart (including the Bluetooth and RGB keys) is in
+[`KEYMAP.md`](KEYMAP.md), generated from the keymap with `tools/gen_keymap_md.py`.
 
 `0 QWERTY · 1 ADJUST · 2 SPACED · 3 SHIFTED · 4 FUNCTION · 5 FUNCSHIFT · 6 macOS · 7 Spaced(Mac)`
 
@@ -82,10 +91,13 @@ two most-recent windows rather than scrolling through all).
   carries pre-shifted keycodes (no hardware modifier held). Capitals and shifted
   symbols come from those keycodes. **Exception:** thumb-shift + Enter sends
   **Shift+Enter** (pos 33 on SHIFTED is `&kp LS(RET)`), so it does not submit in
-  chat apps.
+  chat apps. Likewise thumb-shift + Tab sends **Alt+Shift+Tab** (reverse window
+  switch).
 - **rev2.1 underglow** defaults to the swirl gradient and is **capped at 30%**
   brightness to save battery (`CONFIG_ZMK_RGB_UNDERGLOW_BRT_MAX=30`). ZMK has no
   battery-only dimming, so this is a global ceiling.
 - **Mouse emulation** (`&mkp`/`&mmv`/`&msc`) is on the SPACED layer; needs
   `CONFIG_ZMK_POINTING=y` (set in both `.conf` files).
+- **Battery reporting** is on (both halves). The OS shows the central (left)
+  half; a helper app is needed to see both (`CONFIG_..._BATTERY_LEVEL_PROXY/FETCHING`).
 - **Leader-key sequences and OLED art** from the QMK file are not ported.

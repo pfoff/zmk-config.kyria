@@ -18,3 +18,8 @@ include:
     shield: kyria_rev2_left
   - board: nice_nano_v2
     shield: kyria_rev2_right
+  # One-shot settings wiper (board-agnostic). Flash this to a half, let it reset,
+  # then re-flash that half's normal firmware. Needed for a renamed keyboard,
+  # because ZMK persists the old BT name in storage.
+  - board: nice_nano_v2
+    shield: settings_reset
