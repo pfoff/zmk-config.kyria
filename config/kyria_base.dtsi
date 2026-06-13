@@ -22,6 +22,10 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/outputs.h>
+/* Mouse speed knobs - tune these. Max cursor / wheel velocity (must come BEFORE
+   the pointing.h include). Acceleration is set on &mmv / &msc further down. */
+#define ZMK_POINTING_DEFAULT_MOVE_VAL 1200   /* cursor max speed (ZMK default 600) */
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 20     /* wheel max speed  (ZMK default 10) */
 #include <dt-bindings/zmk/pointing.h>   /* mouse: &mkp &mmv &msc */
 
 /*
@@ -70,7 +74,26 @@
 #define MACOS     6   /* toggled modifier-swap layer for macOS (Ctrl<->Cmd) */
 #define SPACED_MAC 7  /* auto: SPACED + MACOS -> Cmd+Tab task switch instead of Alt+Tab */
 
+/* Mouse/scroll acceleration tuning. Lower time-to-max-speed = snappier ramp. */
+&mmv {
+    acceleration-exponent = <1>;
+    time-to-max-speed-ms = <300>;
+};
+&msc {
+    acceleration-exponent = <0>;
+    time-to-max-speed-ms = <300>;
+};
+
 / {
+    macros {
+        /* Types the sequence "!:" - example of a character-sequence key. */
+        m_exclcolon: m_exclcolon {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp EXCL &kp COLON>;
+        };
+    };
+
     conditional_layers {
         compatible = "zmk,conditional-layers";
         funcshift {
@@ -147,7 +170,7 @@
             bindings = <
 &kp LS(GRAVE) &kp LS(Q) &kp LS(W) &kp LS(E) &kp LS(R) &kp LS(T)                                  &kp LS(Y) &kp LS(U) &kp LS(I) &kp LS(O) &kp LS(P)    &trans
 &trans        &kp LS(A) &kp LS(S) &kp LS(D) &kp LS(F) &kp LS(G)                                  &kp LS(H) &kp LS(J) &kp LS(K) &kp LS(L) &kp LS(SEMI) &kp LS(SQT)
-&trans        &kp LS(Z) &kp LS(X) &kp LS(C) &kp LS(V) &kp LS(B) &kp LA(LS(TAB)) &trans  &trans &kp LS(RET) &kp LS(N) &kp LS(M) &kp LS(COMMA) &kp LS(DOT) &kp LS(FSLH) &trans
+&trans        &kp LS(Z) &kp LS(X) &kp LS(C) &kp LS(V) &kp LS(B) &kp LA(LS(TAB)) &kp LC(LS(TAB))  &trans &kp LS(RET) &kp LS(N) &kp LS(M) &kp LS(COMMA) &kp LS(DOT) &kp LS(FSLH) &trans
                                   &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
             >;
 #ifdef HAS_ENCODERS
@@ -174,7 +197,7 @@
             display-name = "FuncShift";
             bindings = <
 &kp K_PWR  &trans  &trans  &trans  &trans  &trans                              &kp RBKT  &kp F7  &kp F8  &kp F9  &kp F10  &trans
-&trans     &trans  &trans  &trans  &trans  &trans                              &kp RPAR  &kp F4  &kp F5  &kp F6  &kp F11  &kp EXCL
+&trans     &kp FSLH &m_exclcolon &trans  &trans  &trans                       &kp RPAR  &kp F4  &kp F5  &kp F6  &kp F11  &kp EXCL
 &trans     &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans &kp RBRC  &kp F1  &kp F2  &kp F3  &kp F12  &kp PSCRN
                                   &trans  &trans  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans
             >;
@@ -199,10 +222,11 @@
 
         spaced_mac_layer {
             display-name = "Spaced(Mac)";
-            /* Auto when SPACED + MACOS. Transparent keys; only the encoders change. */
+            /* Auto when SPACED + MACOS. Transparent except: scroll wheel reversed
+               (pos 5 / pos 17) for macOS natural scrolling; encoders -> Cmd+Tab. */
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans                                  &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &msc SCRL_DOWN                           &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &msc SCRL_UP                             &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans  &trans &trans    &trans  &trans  &trans  &trans  &trans  &trans
                                   &trans  &trans  &trans  &trans  &trans   &trans  &trans  &trans  &trans  &trans
             >;

@@ -48,7 +48,7 @@ Sleep  BT0   BT1   BT2   BT3   BT4                              RGB   Bri+  Red 
 
         A     S     D     F     G                                H     J     K     L     :     "
 
-        Z     X     C     V     B   A+S+Tb               S+Ent   N     M     <     >     ?
+        Z     X     C     V     B   A+S+TbC+S+Tb         S+Ent   N     M     <     >     ?
 
 ```
 
@@ -68,7 +68,7 @@ Sleep  BT0   BT1   BT2   BT3   BT4                              RGB   Bri+  Red 
 ```
 Power                                                            ]     F7    F8    F9   F10
 
-                                                                 )     F4    F5    F6   F11    !
+        /     !:                                                 )     F4    F5    F6   F11    !
 
                                                                  }     F1    F2    F3   F12  PrtSc
 
