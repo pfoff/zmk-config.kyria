@@ -85,6 +85,15 @@
 };
 
 / {
+    behaviors {
+        /* Encoder as a mouse scroll wheel (CW = up, CCW = down). */
+        msc_enc: msc_enc {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            bindings = <&msc SCRL_UP>, <&msc SCRL_DOWN>;
+        };
+    };
+
     macros {
         /* Types the sequence "!:" - example of a character-sequence key. */
         m_exclcolon: m_exclcolon {
@@ -139,8 +148,8 @@
                                  &trans  &mkp RCLK  &trans  &kp C_BRI_DN  &kp C_VOL_DN     &trans  &trans  &trans  &trans  &trans
             >;
 #ifdef HAS_ENCODERS
-            /* e1 (left) = cursor right/left, e2 (right) = cursor up/down */
-            sensor-bindings = <&inc_dec_kp RIGHT LEFT &inc_dec_kp UP DOWN>;
+            /* e1 (left) = mouse scroll wheel, e2 (right) = Ctrl+Tab / Ctrl+Shift+Tab */
+            sensor-bindings = <&msc_enc &inc_dec_kp LC(TAB) LC(LS(TAB))>;
 #endif
         };
 
